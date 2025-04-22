@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جلب بيانات LinkedIn</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        input, button { padding: 10px; margin: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
+        th { background-color: #f2f2f2; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>جلب بيانات الشركة من LinkedIn</h1>
+        <input type="text" id="companyUrl" placeholder="أدخل رابط الشركة (مثل: https://www.linkedin.com/company/google)">
+        <button onclick="fetchData()">جلب البيانات</button>
+        <div id="error" class="error"></div>
+        <table id="companyTable">
+            <tr>
+                <th>المعلومة</th>
+                <th>القيمة</th>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        async function fetchData() {
+            const companyUrl = document.getElementById('companyUrl').value;
+            const errorDiv = document.getElementById('error');
+            const table = document.getElementById('companyTable');
+            
+            if (!companyUrl) {
+                errorDiv.textContent = 'يرجى إدخال رابط الشركة';
+                return;
+            }
+
+            errorDiv.textContent = '';
+            table.innerHTML = '<tr><th>المعلومة</th><th>القيمة</th></tr>';
+
+            try {
+                const response = await fetch('http://localhost:5000/scrape', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ company_url: companyUrl })
+                });
+
+                if (!response.ok) {
+                    throw new Error('فشل في جلب البيانات');
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    errorDiv.textContent = data.error;
+                    return;
+                }
+
+                table.innerHTML = `
+                    <tr><th>المعلومة</th><th>القيمة</th></tr>
+                    <tr><td>اسم الشركة</td><td>${data.name}</td></tr>
+                    <tr><td>الصناعة</td><td>${data.industry}</td></tr>
+                    <tr><td>حجم الشركة</td><td>${data.size}</td></tr>
+                    <tr><td>الموقع</td><td>${data.location}</td></tr>
+                `;
+            } catch (error) {
+                errorDiv.textContent = 'خطأ: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
