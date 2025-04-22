@@ -43,7 +43,7 @@
             table.innerHTML = '<tr><th>المعلومة</th><th>القيمة</th></tr>';
 
             try {
-                const response = await fetch('http://localhost:5000/scrape', {
+                const response = await fetch('http://172.16.0.1/24:5000/scrape', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
